@@ -11,12 +11,12 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    try {
-        const results: any[] = [];
-        const headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        };
+    const results: any[] = [];
+    const headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    };
 
+    try {
         const ddgUrl = "https://html.duckduckgo.com/html/";
         const params = new URLSearchParams();
 
@@ -40,11 +40,6 @@ export async function GET(req: Request) {
 
             const title = $(el).find(".result__title .result__a").text().trim();
             const rawLink = $(el).find(".result__title .result__a").attr("href");
-            const snippet = $(el).find(".result__snippet").text().trim();
-
-            // DDG URLs are sometimes redirects (//duckduckgo.com/l/?uddg=...) or direct
-            // We need to decode them if possible or just use them.
-            // Usually in the HTML version, it's a direct link or a simple redirect we can extract.
 
             if (title && rawLink) {
                 let url = rawLink;
@@ -80,29 +75,29 @@ export async function GET(req: Request) {
                 });
             }
         });
-
-        // Fallback if no results found (e.g., scraping blocked)
-        if (results.length === 0) {
-            if (type === "video") {
-                results.push({
-                    title: `Watch ${query} tutorials on YouTube`,
-                    url: `https://www.youtube.com/results?search_query=${encodeURIComponent(query + " workout")}`,
-                    source: "YouTube Search",
-                    thumbnail: null
-                });
-            } else {
-                results.push({
-                    title: `Find ${query} recipes on Google`,
-                    url: `https://www.google.com/search?q=${encodeURIComponent(query + " healthy recipe")}`,
-                    source: "Google Search",
-                    thumbnail: null
-                });
-            }
-        }
-
-        return NextResponse.json({ results });
     } catch (error) {
-        console.error("Content fetch error:", error);
-        return NextResponse.json({ error: "Failed to fetch content" }, { status: 500 });
+        console.error("Content fetch error (using fallback):", error);
+        // Continue to fallback
     }
+
+    // Fallback if no results found (e.g., scraping blocked or failed)
+    if (results.length === 0) {
+        if (type === "video") {
+            results.push({
+                title: `Watch ${query} tutorials on YouTube`,
+                url: `https://www.youtube.com/results?search_query=${encodeURIComponent(query + " workout")}`,
+                source: "YouTube Search",
+                thumbnail: null
+            });
+        } else {
+            results.push({
+                title: `Find ${query} recipes on Google`,
+                url: `https://www.google.com/search?q=${encodeURIComponent(query + " healthy recipe")}`,
+                source: "Google Search",
+                thumbnail: null
+            });
+        }
+    }
+
+    return NextResponse.json({ results });
 }
