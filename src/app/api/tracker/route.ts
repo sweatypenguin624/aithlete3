@@ -71,15 +71,20 @@ export async function POST(req: Request) {
         }
 
         // Ensure user exists in DB
-        const dbUser = await prisma.user.upsert({
+        // NOTE: Replaced upsert with findUnique + create to avoid P2010 (Transactions not supported) on standalone Mongo
+        let dbUser = await prisma.user.findUnique({
             where: { clerkId: user.id },
-            update: {},
-            create: {
-                clerkId: user.id,
-                email: user.emailAddresses[0].emailAddress,
-                name: `${user.firstName} ${user.lastName}`.trim(),
-            },
         });
+
+        if (!dbUser) {
+            dbUser = await prisma.user.create({
+                data: {
+                    clerkId: user.id,
+                    email: user.emailAddresses[0].emailAddress,
+                    name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+                },
+            });
+        }
 
         let newLog;
         if (type === "workout") {
