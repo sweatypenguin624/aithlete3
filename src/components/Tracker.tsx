@@ -34,6 +34,11 @@ export default function Tracker() {
     const [mealForm, setMealForm] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" });
     const [weightForm, setWeightForm] = useState({ weight: "" });
 
+    // Flush functionality state
+    const [showFlushConfirm, setShowFlushConfirm] = useState(false);
+    const [flushInput, setFlushInput] = useState("");
+
+
     useEffect(() => {
         // Fetch logs from DB
         const fetchLogs = async () => {
@@ -140,8 +145,13 @@ export default function Tracker() {
         }
     };
 
-    const flushWeightData = async () => {
-        if (!confirm("Are you sure you want to delete ALL weight data? This cannot be undone.")) return;
+    const flushWeightData = () => {
+        setShowFlushConfirm(true);
+        setFlushInput("");
+    };
+
+    const confirmFlush = async () => {
+        if (flushInput !== "FLUSH") return;
 
         try {
             const res = await fetch("/api/tracker?type=weight&all=true", {
@@ -150,6 +160,7 @@ export default function Tracker() {
 
             if (res.ok) {
                 setWeightLogs([]);
+                setShowFlushConfirm(false);
                 alert("All weight data flushed.");
             } else {
                 alert("Failed to flush data.");
@@ -159,6 +170,7 @@ export default function Tracker() {
             alert("Error flushing data.");
         }
     };
+
 
     const deleteWorkout = (id: string) => {
         // TODO: Implement delete API
@@ -497,6 +509,52 @@ export default function Tracker() {
                             </button>
                         </div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Flush Confirmation Modal */}
+            <AnimatePresence>
+                {showFlushConfirm && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white dark:bg-neutral-900 rounded-2xl p-6 max-w-md w-full border border-neutral-200 dark:border-neutral-800 shadow-xl"
+                        >
+                            <h3 className="text-xl font-bold mb-2 text-red-500 flex items-center gap-2">
+                                <Trash2 className="w-5 h-5" />
+                                Flush Weight Data?
+                            </h3>
+                            <p className="text-neutral-500 mb-6">
+                                This action cannot be undone. To confirm deletion of all weight logs, please type <span className="font-bold text-black dark:text-white">FLUSH</span> below.
+                            </p>
+
+                            <input
+                                type="text"
+                                placeholder="Type FLUSH to confirm"
+                                value={flushInput}
+                                onChange={(e) => setFlushInput(e.target.value)}
+                                className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 mb-6 focus:outline-none focus:ring-2 focus:ring-red-500 font-mono"
+                            />
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowFlushConfirm(false)}
+                                    className="flex-1 py-3 px-4 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmFlush}
+                                    disabled={flushInput !== "FLUSH"}
+                                    className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    Delete Everything
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>

@@ -23,12 +23,34 @@ export default function WorkoutPlan({ plan }: WorkoutPlanProps) {
         }
     }, []);
 
+    const [contentResults, setContentResults] = useState([]);
+    const [contentLoading, setContentLoading] = useState(false);
+
     const handleExerciseClick = async (exerciseName: string, videoUrl?: string) => {
         setSelectedExercise(exerciseName);
         setSelectedVideoUrl(videoUrl || null);
         setImageUrl(null);
-        setLoading(true);
+        setContentResults([]);
 
+        // Fetch Content immediately
+        handleFetchContent(exerciseName);
+    };
+
+    const handleFetchContent = async (query: string) => {
+        setContentLoading(true);
+        try {
+            const res = await fetch(`/api/content?query=${encodeURIComponent(query)}&type=video`);
+            const data = await res.json();
+            if (data.results) setContentResults(data.results);
+        } catch (error) {
+            console.error("Failed to fetch content", error);
+        } finally {
+            setContentLoading(false);
+        }
+    };
+
+    const handleGenerateImage = async (exerciseName: string) => {
+        setLoading(true);
         try {
             const res = await fetch("/api/image", {
                 method: "POST",
@@ -107,45 +129,85 @@ export default function WorkoutPlan({ plan }: WorkoutPlanProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
                         onClick={() => setSelectedExercise(null)}
                     >
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white dark:bg-neutral-900 rounded-2xl p-6 max-w-2xl w-full relative shadow-2xl"
+                            className="bg-white dark:bg-neutral-900 rounded-2xl p-6 max-w-2xl w-full relative shadow-2xl my-8"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
                                 onClick={() => setSelectedExercise(null)}
-                                className="absolute top-4 right-4 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
+                                className="absolute top-4 right-4 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors z-10"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                             <h3 className="text-xl font-bold mb-4 pr-12">{selectedExercise}</h3>
 
-                            {/* Video Tutorial Button */}
-                            {selectedVideoUrl && (
-                                <a
-                                    href={selectedVideoUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 mb-4 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors text-sm font-medium"
-                                >
-                                    <Play className="w-4 h-4" />
-                                    Watch Tutorial
-                                    <ExternalLink className="w-3 h-3" />
-                                </a>
-                            )}
-
-                            <div className="aspect-video bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center overflow-hidden">
+                            {/* Image Section */}
+                            <div className="aspect-video bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center overflow-hidden mb-6 relative group">
                                 {loading ? (
-                                    <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+                                        <span className="text-sm text-neutral-500">Creating visual...</span>
+                                    </div>
                                 ) : imageUrl ? (
                                     <img src={imageUrl} alt={selectedExercise} className="w-full h-full object-cover" />
                                 ) : (
-                                    <span className="text-neutral-500 text-sm">Failed to load</span>
+                                    <button
+                                        onClick={() => handleGenerateImage(selectedExercise)}
+                                        className="flex flex-col items-center gap-2 text-neutral-500 hover:text-purple-500 transition-colors"
+                                    >
+                                        <div className="p-4 rounded-full bg-white dark:bg-neutral-700 shadow-sm group-hover:scale-110 transition-transform">
+                                            <ImageIcon className="w-8 h-8" />
+                                        </div>
+                                        <span className="text-sm font-medium">Generate AI Demo</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Tutorials Section */}
+                            <div className="space-y-4">
+                                <h4 className="font-bold flex items-center gap-2">
+                                    <Play className="w-4 h-4 text-red-500" />
+                                    Video Tutorials
+                                </h4>
+
+                                {contentLoading ? (
+                                    <div className="text-center py-4 text-neutral-500 text-sm">Finding best tutorials...</div>
+                                ) : contentResults.length > 0 ? (
+                                    <div className="grid gap-3">
+                                        {contentResults.map((video: any, i) => (
+                                            <a
+                                                key={i}
+                                                href={video.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors border border-neutral-200 dark:border-neutral-700"
+                                            >
+                                                {video.thumbnail && (
+                                                    <img src={video.thumbnail} alt="" className="w-20 h-12 object-cover rounded-lg" />
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-sm truncate pr-2">{video.title}</p>
+                                                    <p className="text-xs text-neutral-500">{video.source}</p>
+                                                </div>
+                                                <ExternalLink className="w-4 h-4 text-neutral-400" />
+                                            </a>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-neutral-500 text-sm italic">
+                                        No tutorials found.
+                                        {selectedVideoUrl && (
+                                            <a href={selectedVideoUrl} target="_blank" className="text-purple-500 ml-1 underline">
+                                                Basic Link
+                                            </a>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </motion.div>
@@ -162,8 +224,8 @@ export default function WorkoutPlan({ plan }: WorkoutPlanProps) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         className={`rounded-2xl overflow-hidden border transition-all duration-300 ${expandedDay === index
-                                ? "bg-white dark:bg-neutral-900 border-purple-500 dark:border-purple-500 shadow-lg ring-1 ring-purple-500/20"
-                                : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-700"
+                            ? "bg-white dark:bg-neutral-900 border-purple-500 dark:border-purple-500 shadow-lg ring-1 ring-purple-500/20"
+                            : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-700"
                             }`}
                     >
                         <button
@@ -172,8 +234,8 @@ export default function WorkoutPlan({ plan }: WorkoutPlanProps) {
                         >
                             <div className="flex items-center gap-4">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-colors ${expandedDay === index
-                                        ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                                        : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500"
+                                    ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+                                    : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500"
                                     }`}>
                                     {index + 1}
                                 </div>
@@ -205,53 +267,59 @@ export default function WorkoutPlan({ plan }: WorkoutPlanProps) {
                                 >
                                     <div className="p-6 pt-0 space-y-4 border-t border-neutral-100 dark:border-neutral-800/50 mt-2">
                                         <div className="h-4"></div> {/* Spacer */}
-                                        {day.exercises.map((exercise, i) => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: i * 0.05 }}
-                                                onClick={() => handleExerciseClick(exercise.name, exercise.videoUrl)}
-                                                className="group relative p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/30 hover:bg-purple-50 dark:hover:bg-purple-900/10 cursor-pointer transition-all duration-200 border border-transparent hover:border-purple-200 dark:hover:border-purple-800"
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className="text-xs font-bold px-2 py-0.5 rounded bg-white dark:bg-neutral-800 text-neutral-500 border border-neutral-200 dark:border-neutral-700">
-                                                                Ex {i + 1}
-                                                            </span>
-                                                            <h4 className="font-semibold text-base text-black dark:text-white">
-                                                                {exercise.name}
-                                                            </h4>
+                                        {day.exercises?.length > 0 ? (
+                                            day.exercises.map((exercise, i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: i * 0.05 }}
+                                                    onClick={() => handleExerciseClick(exercise.name, exercise.videoUrl)}
+                                                    className="group relative p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/30 hover:bg-purple-50 dark:hover:bg-purple-900/10 cursor-pointer transition-all duration-200 border border-transparent hover:border-purple-200 dark:hover:border-purple-800"
+                                                >
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <span className="text-xs font-bold px-2 py-0.5 rounded bg-white dark:bg-neutral-800 text-neutral-500 border border-neutral-200 dark:border-neutral-700">
+                                                                    Ex {i + 1}
+                                                                </span>
+                                                                <h4 className="font-semibold text-base text-black dark:text-white">
+                                                                    {exercise.name}
+                                                                </h4>
+                                                            </div>
+
+                                                            {exercise.notes && (
+                                                                <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3 pl-1">{exercise.notes}</p>
+                                                            )}
+
+                                                            <div className="flex flex-wrap gap-3 text-xs">
+                                                                <div className="flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
+                                                                    <span className="text-neutral-400">Sets</span>
+                                                                    <span className="font-semibold text-neutral-700 dark:text-neutral-300">{exercise.sets}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
+                                                                    <span className="text-neutral-400">Reps</span>
+                                                                    <span className="font-semibold text-neutral-700 dark:text-neutral-300">{exercise.reps}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
+                                                                    <span className="text-neutral-400">Rest</span>
+                                                                    <span className="font-semibold text-neutral-700 dark:text-neutral-300">{exercise.rest}</span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-
-                                                        {exercise.notes && (
-                                                            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3 pl-1">{exercise.notes}</p>
-                                                        )}
-
-                                                        <div className="flex flex-wrap gap-3 text-xs">
-                                                            <div className="flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
-                                                                <span className="text-neutral-400">Sets</span>
-                                                                <span className="font-semibold text-neutral-700 dark:text-neutral-300">{exercise.sets}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
-                                                                <span className="text-neutral-400">Reps</span>
-                                                                <span className="font-semibold text-neutral-700 dark:text-neutral-300">{exercise.reps}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
-                                                                <span className="text-neutral-400">Rest</span>
-                                                                <span className="font-semibold text-neutral-700 dark:text-neutral-300">{exercise.rest}</span>
+                                                        <div className="self-center opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                                                            <div className="p-2 rounded-full bg-white dark:bg-neutral-700 shadow-sm">
+                                                                <ImageIcon className="w-4 h-4 text-purple-500" />
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="self-center opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                                                        <div className="p-2 rounded-full bg-white dark:bg-neutral-700 shadow-sm">
-                                                            <ImageIcon className="w-4 h-4 text-purple-500" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        ))}
+                                                </motion.div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-8 text-neutral-500">
+                                                No exercises scheduled.
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             )}

@@ -63,7 +63,7 @@ export default function LandingPage() {
               bottom: item.bottom
             }}
           >
-            <item.Icon className="w-12 h-12 sm:w-16 sm:h-16" />
+            <item.Icon className="w-8 h-8 sm:w-16 sm:h-16" />
           </motion.div>
         ))}
 
@@ -95,7 +95,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
             >
               Transform Your
               <br />
@@ -121,7 +121,7 @@ export default function LandingPage() {
             >
               <Link
                 href="/app"
-                className="px-10 py-4 bg-white text-black text-lg font-medium rounded-full border border-neutral-300 hover:bg-neutral-50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-black text-lg font-medium rounded-full border border-neutral-300 hover:bg-neutral-50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 Start Your Journey
               </Link>
@@ -130,7 +130,7 @@ export default function LandingPage() {
 
               <button
                 onClick={handlePricingClick}
-                className="px-10 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-medium rounded-full hover:opacity-90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="px-8 py-3 sm:px-10 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-medium rounded-full hover:opacity-90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 View Pricing
               </button>
@@ -138,25 +138,109 @@ export default function LandingPage() {
           </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2"
-        >
+
+      </section>
+
+      {/* Story Section */}
+      <section className="relative py-12 sm:py-20 px-4 bg-white dark:bg-black border-y border-neutral-200 dark:border-neutral-800 overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <svg className="absolute w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <motion.path
+              d="M0 50 Q 25 25 50 50 T 100 50"
+              fill="none"
+              stroke="url(#gradient1)"
+              strokeWidth="0.5"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 0.2 }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+              className="text-purple-500"
+            />
+            <motion.path
+              d="M0 30 Q 25 80 50 30 T 100 30"
+              fill="none"
+              stroke="url(#gradient2)"
+              strokeWidth="0.5"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 0.2 }}
+              transition={{ duration: 2.5, delay: 0.5, ease: "easeInOut" }}
+              className="text-pink-500"
+            />
+            <motion.path
+              d="M0 70 Q 25 20 50 70 T 100 70"
+              fill="none"
+              stroke="url(#gradient1)"
+              strokeWidth="0.5"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 0.1 }}
+              transition={{ duration: 3, delay: 0.2, ease: "easeInOut" }}
+              className="text-blue-500"
+            />
+            <defs>
+              <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
+                <stop offset="50%" stopColor="currentColor" stopOpacity="1" />
+                <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
+                <stop offset="50%" stopColor="currentColor" stopOpacity="1" />
+                <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
           <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
-            className="w-6 h-10 border-2 border-neutral-400 rounded-full flex justify-center pt-2"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute -top-20 -left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+            className="absolute -bottom-20 -right-20 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl"
+          />
+        </div>
+
+        <div className="container mx-auto max-w-4xl text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <div className="w-1 h-2 bg-neutral-400 rounded-full"></div>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+              Wanna know the story behind?
+            </h2>
+            <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto">
+              Discover how a gym enthusiast with no time and no money built an AI to solve his own problem.
+            </p>
+            <Link
+              href="/about"
+              className="inline-block px-10 py-4 border-2 border-neutral-300 dark:border-neutral-700 text-black dark:text-white text-lg font-medium rounded-full hover:border-purple-500 dark:hover:border-purple-500 transition-all duration-300 hover:scale-105 backdrop-blur-sm bg-white/50 dark:bg-black/50"
+            >
+              Read Our Story
+            </Link>
           </motion.div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 sm:py-32 px-4 bg-neutral-50 dark:bg-neutral-950">
+      <section className="py-16 sm:py-32 px-4 bg-neutral-50 dark:bg-neutral-950">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -242,15 +326,18 @@ export default function LandingPage() {
 
 
       {/* CTA Section */}
-      <section className="py-20 sm:py-32 px-4">
-        <div className="container mx-auto max-w-4xl text-center">
+      <section className="relative py-16 sm:py-32 px-4">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 gradient-primary opacity-10 dark:opacity-5"></div>
+
+        <div className="container mx-auto max-w-4xl text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6">
               Ready to Start Your
               <br />
               <span className="gradient-text">Transformation?</span>
@@ -261,7 +348,7 @@ export default function LandingPage() {
 
             <Link
               href="/app"
-              className="inline-block px-12 py-5 bg-white text-black text-lg font-medium rounded-full border border-neutral-300 hover:bg-neutral-50 hover:scale-105 hover:shadow-lg transition-all duration-300"
+              className="inline-block px-8 py-4 sm:px-12 sm:py-5 bg-white text-black text-lg font-medium rounded-full border border-neutral-300 hover:bg-neutral-50 hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
               Get Started Free
             </Link>
@@ -269,30 +356,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Story Section */}
-      <section className="py-20 px-4 bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800">
-        <div className="container mx-auto max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Wanna know the story behind?
-            </h2>
-            <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto">
-              Discover how a gym enthusiast with no time and no money built an AI to solve his own problem.
-            </p>
-            <Link
-              href="/about"
-              className="inline-block px-10 py-4 border-2 border-neutral-300 dark:border-neutral-700 text-black dark:text-white text-lg font-medium rounded-full hover:border-purple-500 dark:hover:border-purple-500 transition-all duration-300 hover:scale-105"
-            >
-              Read Our Story
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+
 
       {/* Pricing Modal */}
       <AnimatePresence>

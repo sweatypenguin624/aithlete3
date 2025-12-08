@@ -20,51 +20,114 @@ export async function POST(req: Request) {
       );
     }
 
+    // Dynamic Logic based on User Data
+    let levelInstructions = "";
+    switch (userData.level) {
+      case "Beginner":
+        levelInstructions = `
+        - Focus on mastering FORM and technique.
+        - Volume: Low-Moderate (3-4 exercises per session).
+        - Intensity: 2 Sets per exercise.
+        - Rep Range: 10-12 controlled reps.
+        - Focus on compound movements (Squats, Pushups, Lunges).
+        `;
+        break;
+      case "Intermediate":
+        levelInstructions = `
+        - Focus on Hypertrophy (Muscle Growth) and progressive overload.
+        - Volume: Moderate (4-5 exercises per session).
+        - Intensity: 3 Sets per exercise.
+        - Rep Range: 8-12 reps near failure.
+        - Mix of compound and isolation movements.
+        `;
+        break;
+      case "Advanced":
+        levelInstructions = `
+        - Focus on Max Strength and High Volume.
+        - Volume: High (5-6+ exercises per session).
+        - Intensity: 3-4 Sets per exercise.
+        - Rep Range: Varied (6-12 reps).
+        - Incorporate advanced techniques like Supersets, Dropsets, or Pyramids implicitly in the notes.
+        `;
+        break;
+      default:
+        levelInstructions = "- Standard balanced plan: 3 sets of 10-12 reps.";
+    }
+
+    let locationInstructions = "";
+    switch (userData.location) {
+      case "Home":
+        locationInstructions = `
+        - STRICTLY NO GYM MACHINES.
+        - Use Bodyweight exercises (Pushups, Squats, Lunges, Burpees, Planks).
+        - If weights are needed, assume common household items or dumbbells ONLY if specified, otherwise stick to Calisthenics.
+        `;
+        break;
+      case "Gym":
+        locationInstructions = `
+        - Utilize FULL GYM EQUIPMENT: Barbells, Dumbbells, Machines, Cables.
+        - Include heavy compound lifts (Bench Press, Deadlifts, Squats) where appropriate.
+        `;
+        break;
+      case "Outdoor":
+        locationInstructions = `
+        - Focus on running, sprinting, and functional movements.
+        - Use park benches for dips/step-ups.
+        - High intensity cardio and plyometrics.
+        `;
+        break;
+      default:
+        locationInstructions = "- Use available equipment.";
+    }
+
     const prompt = `
-      Act as an expert fitness coach and nutritionist specializing in Indian cuisine and dietary habits. Generate a personalized 7-day workout and diet plan for the following user:
+      Act as an expert fitness coach and nutritionist specializing in Indian cuisine and dietary habits. Generate a specialized, high-quality 7-day workout and diet plan for:
       
-      Name: ${userData.name}
-      Age: ${userData.age}
-      Gender: ${userData.gender}
-      Height: ${userData.height}cm
-      Weight: ${userData.weight}kg
-      Goal: ${userData.goal}
-      Fitness Level: ${userData.level}
-      Location: ${userData.location}
-      Dietary Preferences: ${userData.dietaryPreferences}
-      Medical History: ${userData.medicalHistory || "None"}
+      User Profile:
+      - Name: ${userData.name}
+      - Goal: ${userData.goal} (${userData.level} Level)
+      - Stats: ${userData.age}yr / ${userData.gender} / ${userData.height}cm / ${userData.weight}kg
+      - Location: ${userData.location}
+      - Diet: ${userData.dietaryPreferences}
+      - Medical: ${userData.medicalHistory || "None"}
 
-      IMPORTANT DIETARY GUIDELINES FOR INDIAN AUDIENCE:
-      - All meals should feature authentic Indian dishes and ingredients commonly available in India
-      - For "Non-Veg" preference: Provide a BALANCED mix - include both vegetarian meals (around 40-50% of meals) and non-vegetarian meals (chicken, fish, eggs). This reflects typical Indian eating habits where people don't eat meat at every meal.
-      - For "Veg" preference: Focus on protein-rich vegetarian options like paneer, dal, legumes, soy, and dairy
-      - Use Indian cooking methods: curry, dal, roti, rice, sabzi, etc.
-      - Include traditional Indian breakfast items like: poha, upma, idli, dosa, paratha, oats with Indian spices
-      - Lunch and dinner should include combinations like: dal-rice, roti-sabzi, curry with rice/roti
-      - Snacks should be Indian-friendly: nuts, fruits, chana, sprouts, yogurt, etc.
-      - Mention Indian spices and preparation methods (e.g., "tadka dal", "stir-fried with jeera")
-      - Consider meal timings common in India (breakfast 8-9am, lunch 1-2pm, dinner 8-9pm)
+      *** WORKOUT STRATEGY Based on Level (${userData.level}) ***
+      ${levelInstructions}
 
-      CRITICAL INSTRUCTIONS FOR VARIETY:
-      - Ensure HIGH VARIETY in meals. Do not repeat the same breakfast, lunch, or dinner more than once if possible.
-      - Introduce different Indian cuisines (North Indian, South Indian, Maharashtrian, etc.) to keep the diet interesting.
-      - For workouts, ensure a good mix of exercises. If a muscle group is repeated, vary the exercises (e.g., Flat Bench Press on Monday, Incline Dumbbell Press on Thursday).
-      - Avoid repetitive descriptions. Make each day feel unique and engaging.
+      *** EQUIPMENT STRATEGY Based on Location (${userData.location}) ***
+      ${locationInstructions}
 
+      *** IMPORTANT DIETARY GUIDELINES (Indian Context) ***
+      - All meals must be authentic Indian dishes.
+      - For "Non-Veg": Balanced mix (40-50% Veg, rest Non-Veg).
+      - For "Veg + Non-Veg": Explicitly mostly Veg with 3-4 Non-Veg meals/week.
+      - For "Veg": High protein Vegetarian (Paneer, Soya, Dal, Legumes).
+      - For "Vegan": Plant-based Indian (Tofu, Lentils, Chana).
+      - For "Keto": Low carb Indian (Paneer/Chicken/Fish tikka, Leafy greens, Ghee).
+      - Use Indian cooking styles (Curry, Tandoori, Stir-fry).
+      
+      *** CRITICAL RULES FOR VARIETY & USABILITY ***
+      1. NO REPETITION: Every day must feel unique. Do not repeat the same exact meal structure.
+      2. PROGRESSION: The workout should feel like a structured week, not random exercises.
+      3. REALISM: Ensure the diet is practical for an Indian household.
+      4. USABILITY:
+         - Beginner: Keep it simple, 2 sets.
+         - Intermediate/Advanced: Ramp up volume to 3-4 sets.
+      
       Return the response strictly in the following JSON format:
       {
         "workoutPlan": [
           {
             "day": "Day 1",
-            "focus": "Chest and Triceps",
+            "focus": "Target Muscle Group",
             "exercises": [
               { 
-                "name": "Push-ups", 
-                "sets": "3", 
-                "reps": "12", 
+                "name": "Exercise Name", 
+                "sets": "Based on Level", 
+                "reps": "Range", 
                 "rest": "60s", 
-                "notes": "Keep back straight",
-                "videoUrl": "https://www.youtube.com/watch?v=example" 
+                "notes": "Form tip",
+                "videoUrl": "Real YouTube Link" 
               }
             ]
           }
@@ -72,55 +135,17 @@ export async function POST(req: Request) {
         "dietPlan": [
           {
             "day": "Day 1",
-            "breakfast": { 
-              "name": "Poha", 
-              "description": "Flattened rice with peanuts and spices", 
-              "calories": "300", 
-              "protein": "10g", 
-              "carbs": "50g", 
-              "fats": "8g",
-              "recipeUrl": "https://www.example.com/poha-recipe"
-            },
-            "lunch": { 
-              "name": "Dal Rice with Sabzi", 
-              "description": "Yellow dal, steamed rice, and mix veg curry", 
-              "calories": "500", 
-              "protein": "20g", 
-              "carbs": "70g", 
-              "fats": "10g",
-              "recipeUrl": "https://www.example.com/dal-rice-recipe"
-            },
-            "dinner": { 
-              "name": "Grilled Chicken Curry with Roti", 
-              "description": "Chicken breast curry with 2 whole wheat rotis", 
-              "calories": "450", 
-              "protein": "35g", 
-              "carbs": "40g", 
-              "fats": "12g",
-              "recipeUrl": "https://www.example.com/chicken-curry-recipe"
-            },
-            "snacks": [
-               { 
-                 "name": "Roasted Chana", 
-                 "description": "Spiced roasted chickpeas", 
-                 "calories": "150", 
-                 "protein": "8g", 
-                 "carbs": "20g", 
-                 "fats": "4g",
-                 "recipeUrl": "https://www.example.com/roasted-chana-recipe"
-               }
-            ]
+            "breakfast": { "name": "", "description": "", "calories": "", "protein": "", "carbs": "", "fats": "", "recipeUrl": "" },
+            "lunch": { "name": "", "description": "", "calories": "", "protein": "", "carbs": "", "fats": "", "recipeUrl": "" },
+            "dinner": { "name": "", "description": "", "calories": "", "protein": "", "carbs": "", "fats": "", "recipeUrl": "" },
+            "snacks": [{ "name": "", "description": "", "calories": "", "protein": "", "carbs": "", "fats": "", "recipeUrl": "" }]
           }
         ],
-        "tips": ["Drink at least 3-4 liters of water daily", "Get 7-8 hours of sleep", "Have dinner 2 hours before bed"],
-        "motivation": "Consistency is the key to transformation!"
+        "tips": ["Tip 1", "Tip 2", "Tip 3"],
+        "motivation": "Short punchy quote"
       }
       
-      IMPORTANT: Include real YouTube video URLs for each exercise tutorial and recipe blog URLs (like Veg Recipes of India, Cooking Shooking, etc.) for each meal.
-      Ensure the plan is detailed, culturally appropriate for Indian users, and suitable for the user's level and goal. 
-      For Non-Veg preference, alternate between vegetarian and non-vegetarian meals throughout the week - don't make every meal non-veg.
-      Provide complete 7 days of workouts and diets with video and recipe URLs.
-      Do not include any markdown formatting like \`\`\`json. Just return the raw JSON string.
+      Ensure valid JSON. No markdown.
     `;
 
     const completion = await openai.chat.completions.create({

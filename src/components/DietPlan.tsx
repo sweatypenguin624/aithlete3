@@ -23,12 +23,34 @@ export default function DietPlan({ plan }: DietPlanProps) {
         }
     }, []);
 
+    const [contentResults, setContentResults] = useState([]);
+    const [contentLoading, setContentLoading] = useState(false);
+
     const handleMealClick = async (mealName: string, recipeUrl?: string) => {
         setSelectedMeal(mealName);
         setSelectedRecipeUrl(recipeUrl || null);
         setImageUrl(null);
-        setLoading(true);
+        setContentResults([]);
 
+        // Fetch Content immediately
+        handleFetchContent(mealName);
+    };
+
+    const handleFetchContent = async (query: string) => {
+        setContentLoading(true);
+        try {
+            const res = await fetch(`/api/content?query=${encodeURIComponent(query)}&type=recipe`);
+            const data = await res.json();
+            if (data.results) setContentResults(data.results);
+        } catch (error) {
+            console.error("Failed to fetch content", error);
+        } finally {
+            setContentLoading(false);
+        }
+    };
+
+    const handleGenerateImage = async (mealName: string) => {
+        setLoading(true);
         try {
             const res = await fetch("/api/image", {
                 method: "POST",
@@ -151,45 +173,85 @@ export default function DietPlan({ plan }: DietPlanProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
                         onClick={() => setSelectedMeal(null)}
                     >
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white dark:bg-neutral-900 rounded-2xl p-6 max-w-2xl w-full relative shadow-2xl"
+                            className="bg-white dark:bg-neutral-900 rounded-2xl p-6 max-w-2xl w-full relative shadow-2xl my-8"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
                                 onClick={() => setSelectedMeal(null)}
-                                className="absolute top-4 right-4 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
+                                className="absolute top-4 right-4 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors z-10"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                             <h3 className="text-xl font-bold mb-4 pr-12">{selectedMeal}</h3>
 
-                            {/* Recipe Link Button */}
-                            {selectedRecipeUrl && (
-                                <a
-                                    href={selectedRecipeUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 mb-4 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors text-sm font-medium"
-                                >
-                                    <BookOpen className="w-4 h-4" />
-                                    View Recipe
-                                    <ExternalLink className="w-3 h-3" />
-                                </a>
-                            )}
-
-                            <div className="aspect-video bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center overflow-hidden">
+                            {/* Image Section */}
+                            <div className="aspect-video bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center overflow-hidden mb-6 relative group">
                                 {loading ? (
-                                    <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+                                        <span className="text-sm text-neutral-500">Plating your dish...</span>
+                                    </div>
                                 ) : imageUrl ? (
                                     <img src={imageUrl} alt={selectedMeal} className="w-full h-full object-cover" />
                                 ) : (
-                                    <span className="text-neutral-500 text-sm">Failed to load</span>
+                                    <button
+                                        onClick={() => handleGenerateImage(selectedMeal)}
+                                        className="flex flex-col items-center gap-2 text-neutral-500 hover:text-green-500 transition-colors"
+                                    >
+                                        <div className="p-4 rounded-full bg-white dark:bg-neutral-700 shadow-sm group-hover:scale-110 transition-transform">
+                                            <ImageIcon className="w-8 h-8" />
+                                        </div>
+                                        <span className="text-sm font-medium">Generate AI Photo</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Recipes Section */}
+                            <div className="space-y-4">
+                                <h4 className="font-bold flex items-center gap-2">
+                                    <BookOpen className="w-4 h-4 text-orange-500" />
+                                    Recipes & Articles
+                                </h4>
+
+                                {contentLoading ? (
+                                    <div className="text-center py-4 text-neutral-500 text-sm">Searching for recipes...</div>
+                                ) : contentResults.length > 0 ? (
+                                    <div className="grid gap-3">
+                                        {contentResults.map((item: any, i) => (
+                                            <a
+                                                key={i}
+                                                href={item.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors border border-neutral-200 dark:border-neutral-700"
+                                            >
+                                                <div className="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+                                                    <BookOpen className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-sm truncate pr-2">{item.title}</p>
+                                                    <p className="text-xs text-neutral-500">{item.source}</p>
+                                                </div>
+                                                <ExternalLink className="w-4 h-4 text-neutral-400" />
+                                            </a>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-neutral-500 text-sm italic">
+                                        No specific recipes found.
+                                        {selectedRecipeUrl && (
+                                            <a href={selectedRecipeUrl} target="_blank" className="text-green-500 ml-1 underline">
+                                                Basic Link
+                                            </a>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </motion.div>
@@ -206,8 +268,8 @@ export default function DietPlan({ plan }: DietPlanProps) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         className={`rounded-2xl overflow-hidden border transition-all duration-300 ${expandedDay === index
-                                ? "bg-white dark:bg-neutral-900 border-green-500 dark:border-green-500 shadow-lg ring-1 ring-green-500/20"
-                                : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-700"
+                            ? "bg-white dark:bg-neutral-900 border-green-500 dark:border-green-500 shadow-lg ring-1 ring-green-500/20"
+                            : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-700"
                             }`}
                     >
                         <button
@@ -216,8 +278,8 @@ export default function DietPlan({ plan }: DietPlanProps) {
                         >
                             <div className="flex items-center gap-4">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-colors ${expandedDay === index
-                                        ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                                        : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500"
+                                    ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                                    : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500"
                                     }`}>
                                     {index + 1}
                                 </div>
