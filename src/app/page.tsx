@@ -257,7 +257,7 @@ export default function LandingPage() {
               Wanna know the story behind?
             </h2>
             <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto">
-              Discover how a gym enthusiast with no time and no money built an AI to solve his own problem.
+              Discover how a gym enthusiast with no time and no money built an AI trainer to solve his own problem.
             </p>
             <Link
               href="/about"
