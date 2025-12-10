@@ -224,23 +224,23 @@ export default function DietPlan({ plan }: DietPlanProps) {
                                 {contentLoading ? (
                                     <div className="text-center py-4 text-neutral-500 text-sm">Searching for recipes...</div>
                                 ) : contentResults.length > 0 ? (
-                                    <div className="grid gap-3">
+                                    <div className="flex flex-col gap-3 w-full max-w-full">
                                         {contentResults.map((item: any, i) => (
                                             <a
                                                 key={i}
                                                 href={item.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors border border-neutral-200 dark:border-neutral-700"
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors border border-neutral-200 dark:border-neutral-700 w-full overflow-hidden max-w-full"
                                             >
-                                                <div className="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+                                                <div className="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 shrink-0">
                                                     <BookOpen className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-medium text-sm truncate pr-2">{item.title}</p>
-                                                    <p className="text-xs text-neutral-500">{item.source}</p>
+                                                    <p className="text-xs text-neutral-500 truncate">{item.source}</p>
                                                 </div>
-                                                <ExternalLink className="w-4 h-4 text-neutral-400" />
+                                                <ExternalLink className="w-4 h-4 text-neutral-400 shrink-0" />
                                             </a>
                                         ))}
                                     </div>

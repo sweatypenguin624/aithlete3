@@ -179,23 +179,23 @@ export default function WorkoutPlan({ plan }: WorkoutPlanProps) {
                                 {contentLoading ? (
                                     <div className="text-center py-4 text-neutral-500 text-sm">Finding best tutorials...</div>
                                 ) : contentResults.length > 0 ? (
-                                    <div className="grid gap-3">
+                                    <div className="flex flex-col gap-3 w-full max-w-full">
                                         {contentResults.map((video: any, i) => (
                                             <a
                                                 key={i}
                                                 href={video.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors border border-neutral-200 dark:border-neutral-700"
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors border border-neutral-200 dark:border-neutral-700 w-full overflow-hidden max-w-full"
                                             >
                                                 {video.thumbnail && (
-                                                    <img src={video.thumbnail} alt="" className="w-20 h-12 object-cover rounded-lg" />
+                                                    <img src={video.thumbnail} alt="" className="w-20 h-12 object-cover rounded-lg shrink-0" />
                                                 )}
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-medium text-sm truncate pr-2">{video.title}</p>
-                                                    <p className="text-xs text-neutral-500">{video.source}</p>
+                                                    <p className="text-xs text-neutral-500 truncate">{video.source}</p>
                                                 </div>
-                                                <ExternalLink className="w-4 h-4 text-neutral-400" />
+                                                <ExternalLink className="w-4 h-4 text-neutral-400 shrink-0" />
                                             </a>
                                         ))}
                                     </div>

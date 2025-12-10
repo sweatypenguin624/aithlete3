@@ -32,11 +32,11 @@ export default function LandingPage() {
           { Icon: Dumbbell, top: "15%", left: "10%", delay: 0, duration: 8, color: "text-purple-500" },
           { Icon: Activity, top: "25%", right: "15%", delay: 2, duration: 10, color: "text-pink-500" },
           { Icon: Heart, bottom: "20%", left: "15%", delay: 1, duration: 9, color: "text-red-500" },
-          { Icon: Zap, top: "40%", left: "25%", delay: 3, duration: 7, color: "text-yellow-500" },
-          { Icon: Trophy, bottom: "30%", right: "10%", delay: 4, duration: 11, color: "text-amber-500" },
-          { Icon: Flame, top: "60%", right: "25%", delay: 2.5, duration: 8.5, color: "text-orange-500" },
+          { Icon: Zap, top: "40%", left: "25%", delay: 3, duration: 7, color: "text-yellow-500", hiddenOnMobile: true },
+          { Icon: Trophy, bottom: "30%", right: "10%", delay: 4, duration: 11, color: "text-amber-500", hiddenOnMobile: true },
+          { Icon: Flame, top: "60%", right: "25%", delay: 2.5, duration: 8.5, color: "text-orange-500", hiddenOnMobile: true },
           { Icon: Timer, top: "10%", left: "40%", delay: 1.5, duration: 9.5, color: "text-blue-500" },
-          { Icon: Scale, bottom: "15%", right: "35%", delay: 3.5, duration: 10.5, color: "text-green-500" },
+          { Icon: Scale, bottom: "15%", right: "35%", delay: 3.5, duration: 10.5, color: "text-green-500", hiddenOnMobile: true },
           { Icon: Apple, top: "50%", right: "5%", delay: 0.5, duration: 8, color: "text-red-400" },
           { Icon: Footprints, bottom: "40%", left: "5%", delay: 2, duration: 12, color: "text-stone-500" },
           { Icon: Bike, top: "5%", right: "30%", delay: 4, duration: 11, color: "text-cyan-500" },
@@ -55,7 +55,7 @@ export default function LandingPage() {
               delay: item.delay,
               ease: "easeInOut"
             }}
-            className={`absolute ${item.color} opacity-20 dark:opacity-10`}
+            className={`absolute ${item.color} opacity-20 dark:opacity-10 ${item.hiddenOnMobile ? 'hidden sm:block' : ''}`}
             style={{
               top: item.top,
               left: item.left,
@@ -91,22 +91,54 @@ export default function LandingPage() {
             className="text-center"
           >
             {/* Main Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.15,
+                    delayChildren: 0.2
+                  }
+                }
+              }}
+              className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold mb-8 leading-tight tracking-tight"
             >
-              Transform Your
-              <br />
-              <span className="gradient-text">Fitness Journey</span>
-            </motion.h1>
+              {["Transform", "Your", "Fitness", "Journey"].map((word, i) => (
+                <span key={i} className="inline-block mr-[0.2em] last:mr-0">
+                  {i > 1 ? (
+                    <motion.span
+                      variants={{
+                        hidden: { opacity: 0, y: 40, rotateX: 90 },
+                        visible: { opacity: 1, y: 0, rotateX: 0, transition: { type: "spring", damping: 12, stiffness: 100 } }
+                      }}
+                      className="gradient-text animate-shimmer"
+                    >
+                      {word}
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      variants={{
+                        hidden: { opacity: 0, y: 40, rotateX: 90 },
+                        visible: { opacity: 1, y: 0, rotateX: 0, transition: { type: "spring", damping: 12, stiffness: 100 } }
+                      }}
+                    >
+                      {word}
+                    </motion.span>
+                  )}
+                  {i === 1 && <br className="hidden sm:block" />}
+                  {i === 1 && <div className="sm:hidden h-2"></div>}
+                </span>
+              ))}
+            </motion.div>
 
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="text-lg sm:text-xl md:text-2xl text-neutral-600 dark:text-neutral-400 font-light max-w-3xl mx-auto mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 0.8 }}
+              className="text-xl sm:text-2xl md:text-3xl text-neutral-600 dark:text-neutral-400 font-light max-w-3xl mx-auto mb-12 px-4 leading-relaxed"
             >
               AI-powered personalized workout and diet plans tailored to your goals,
               fitness level, and lifestyle.
@@ -117,20 +149,18 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0"
             >
               <Link
                 href="/app"
-                className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-black text-lg font-medium rounded-full border border-neutral-300 hover:bg-neutral-50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="w-full sm:w-auto px-8 py-3 sm:px-10 sm:py-4 bg-white text-black text-lg font-medium rounded-full border border-neutral-300 hover:bg-neutral-50 transition-all duration-300 hover:scale-105 hover:shadow-lg text-center"
               >
                 Start Your Journey
               </Link>
 
-
-
               <button
                 onClick={handlePricingClick}
-                className="px-8 py-3 sm:px-10 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-medium rounded-full hover:opacity-90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="w-full sm:w-auto px-8 py-3 sm:px-10 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-medium rounded-full hover:opacity-90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 View Pricing
               </button>
@@ -267,7 +297,7 @@ export default function LandingPage() {
               },
               {
                 icon: Utensils,
-                title: "AI Dietitian",
+                title: "AI Dietician",
                 description: "Get expert nutrition advice and meal plans generated at your convenience to fuel your body right.",
                 gradient: "from-green-500 to-emerald-500"
               },

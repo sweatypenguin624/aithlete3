@@ -79,6 +79,25 @@
     backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
   }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .animate-shimmer {
+    background-size: 200% auto;
+    animation: shimmer 5s linear infinite;
+  }
 }
 
 body {
