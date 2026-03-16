@@ -59,7 +59,7 @@ export default function AboutPage() {
                             </span>
                         </motion.div>
                         <h1 className="text-5xl sm:text-7xl font-bold mb-6">
-                            Hi, I'm <span className="gradient-text">Abhay</span>
+                            Hi, this is <span className="gradient-text">Yogesh & Vijay</span>
                         </h1>
                         <p className="text-xl sm:text-2xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
                             A robotics enthusiast and full-stack developer with a story to tell.
