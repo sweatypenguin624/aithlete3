@@ -166,11 +166,17 @@ export async function POST(req: Request) {
     `;
 
     const completion = await openai.chat.completions.create({
-      model: "llama-3.3-70b-versatile", // Using a strong model available on Groq
+      model: "llama-3.3-70b-versatile",
       messages: [
-        { role: "system", content: "You are an expert Indian fitness coach and nutritionist who specializes in creating culturally appropriate diet plans featuring authentic Indian cuisine. You always output valid JSON without any markdown formatting." },
+        { 
+          role: "system", 
+          content: "You are an expert Indian fitness coach and nutritionist. You specialize in creating culturally appropriate diet plans with authentic Indian cuisine. You MUST ALWAYS return response in VALID JSON format." 
+        },
         { role: "user", content: prompt },
       ],
+      response_format: { type: "json_object" },
+      max_tokens: 6000, // Increased to avoid truncation of large 7-day plans
+      temperature: 0.7,
     });
 
     const text = completion.choices[0].message.content || "";
